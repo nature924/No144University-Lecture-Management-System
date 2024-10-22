@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ForumDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.forum_name as forumName
+        ,a.gongsi_id as gongsiId
+        ,a.yonghu_id as yonghuId
+        ,a.users_id as usersId
+        ,a.forum_content as forumContent
+        ,a.super_ids as superIds
+        ,a.forum_state_types as forumStateTypes
+        ,a.insert_time as insertTime
+        ,a.update_time as updateTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ForumView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,gongsi.gongsi_name as gongsiName
+        ,gongsi.gongsi_types as gongsiTypes
+        ,gongsi.gongsi_phone as gongsiPhone
+        ,gongsi.gongsi_email as gongsiEmail
+        ,gongsi.gongsi_photo as gongsiPhoto
+        ,gongsi.gongsi_content as gongsiContent
+        ,gongsi.gongsi_delete as gongsiDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.xueyuan_types as xueyuanTypes
+        ,yonghu.zhuanye_types as zhuanyeTypes
+        ,yonghu.yonghu_delete as yonghuDelete
+        ,users.username as uusername
+        ,users.password as upassword
+        ,users.role as urole
+        ,users.addtime as uaddtime
+
+        FROM forum  a
+        left JOIN gongsi gongsi ON a.gongsi_id = gongsi.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+        left JOIN users users ON a.users_id = users.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.forumName != '' and params.forumName != null and params.forumName != 'null' ">
+                and a.forum_name like CONCAT('%',#{params.forumName},'%')
+            </if>
+            <if test="params.gongsiId != null and params.gongsiId != ''">
+                and (
+                    a.gongsi_id = #{params.gongsiId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.usersId != null and params.usersId != ''">
+                and (
+                    a.users_id = #{params.usersId}
+                )
+            </if>
+            <if test=" params.forumContent != '' and params.forumContent != null and params.forumContent != 'null' ">
+                and a.forum_content like CONCAT('%',#{params.forumContent},'%')
+            </if>
+            <if test="params.superIdsStart != null and params.superIdsStart != ''">
+                <![CDATA[  and a.super_ids >= #{params.superIdsStart}   ]]>
+            </if>
+            <if test="params.superIdsEnd != null and params.superIdsEnd != ''">
+                <![CDATA[  and a.super_ids <= #{params.superIdsEnd}   ]]>
+            </if>
+             <if test="params.superIds != null and params.superIds != ''">
+                and a.super_ids = #{params.superIds}
+             </if>
+            <if test="params.forumStateTypes != null and params.forumStateTypes != ''">
+                and a.forum_state_types = #{params.forumStateTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test=" params.updateTimeStart != '' and params.updateTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.update_time) >= UNIX_TIMESTAMP(#{params.updateTimeStart}) ]]>
+            </if>
+            <if test=" params.updateTimeEnd != '' and params.updateTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.update_time) <= UNIX_TIMESTAMP(#{params.updateTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断企业的id不为空 -->
+            <if test=" params.gongsiIdNotNull != '' and params.gongsiIdNotNull != null and params.gongsiIdNotNull != 'null' ">
+                and a.gongsi_id IS NOT NULL
+            </if>
+            <if test=" params.gongsiName != '' and params.gongsiName != null and params.gongsiName != 'null' ">
+                and gongsi.gongsi_name like CONCAT('%',#{params.gongsiName},'%')
+            </if>
+            <if test="params.gongsiTypes != null  and params.gongsiTypes != ''">
+                and gongsi.gongsi_types = #{params.gongsiTypes}
+            </if>
+
+            <if test=" params.gongsiPhone != '' and params.gongsiPhone != null and params.gongsiPhone != 'null' ">
+                and gongsi.gongsi_phone like CONCAT('%',#{params.gongsiPhone},'%')
+            </if>
+            <if test=" params.gongsiEmail != '' and params.gongsiEmail != null and params.gongsiEmail != 'null' ">
+                and gongsi.gongsi_email like CONCAT('%',#{params.gongsiEmail},'%')
+            </if>
+            <if test=" params.gongsiContent != '' and params.gongsiContent != null and params.gongsiContent != 'null' ">
+                and gongsi.gongsi_content like CONCAT('%',#{params.gongsiContent},'%')
+            </if>
+            <if test="params.gongsiDeleteStart != null  and params.gongsiDeleteStart != '' ">
+                <![CDATA[  and gongsi.gongsi_delete >= #{params.gongsiDeleteStart}   ]]>
+            </if>
+            <if test="params.gongsiDeleteEnd != null  and params.gongsiDeleteEnd != '' ">
+                <![CDATA[  and gongsi.gongsi_delete <= #{params.gongsiDeleteEnd}   ]]>
+            </if>
+            <if test="params.gongsiDelete != null  and params.gongsiDelete != '' ">
+                and gongsi.gongsi_delete = #{params.gongsiDelete}
+            </if>
+                <!-- 判断学生的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.xueyuanTypes != null  and params.xueyuanTypes != ''">
+                and yonghu.xueyuan_types = #{params.xueyuanTypes}
+            </if>
+
+            <if test="params.zhuanyeTypes != null  and params.zhuanyeTypes != ''">
+                and yonghu.zhuanye_types = #{params.zhuanyeTypes}
+            </if>
+
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+                <!-- 判断管理员的id不为空 -->
+            <if test=" params.usersIdNotNull != '' and params.usersIdNotNull != null and params.usersIdNotNull != 'null' ">
+                and a.users_id IS NOT NULL
+            </if>
+            <if test=" params.username != '' and params.username != null and params.username != 'null' ">
+                and users.username like CONCAT('%',#{params.username},'%')
+            </if>
+            <if test=" params.password != '' and params.password != null and params.password != 'null' ">
+                and users.password like CONCAT('%',#{params.password},'%')
+            </if>
+            <if test=" params.role != '' and params.role != null and params.role != 'null' ">
+                and users.role like CONCAT('%',#{params.role},'%')
+            </if>
+            <if test=" params.addtimeStart != '' and params.addtimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(users.addtime) >= UNIX_TIMESTAMP(#{params.addtimeStart}) ]]>
+            </if>
+            <if test=" params.addtimeEnd != '' and params.addtimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(users.addtime) <= UNIX_TIMESTAMP(#{params.addtimeEnd}) ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

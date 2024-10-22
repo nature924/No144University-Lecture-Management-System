@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GongsiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.username as username
+        ,a.password as password
+        ,a.gongsi_name as gongsiName
+        ,a.gongsi_types as gongsiTypes
+        ,a.gongsi_phone as gongsiPhone
+        ,a.gongsi_email as gongsiEmail
+        ,a.gongsi_photo as gongsiPhoto
+        ,a.gongsi_content as gongsiContent
+        ,a.gongsi_delete as gongsiDelete
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.GongsiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM gongsi  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.username != '' and params.username != null and params.username != 'null' ">
+                and a.username like CONCAT('%',#{params.username},'%')
+            </if>
+            <if test=" params.password != '' and params.password != null and params.password != 'null' ">
+                and a.password like CONCAT('%',#{params.password},'%')
+            </if>
+            <if test=" params.gongsiName != '' and params.gongsiName != null and params.gongsiName != 'null' ">
+                and a.gongsi_name like CONCAT('%',#{params.gongsiName},'%')
+            </if>
+            <if test="params.gongsiTypes != null and params.gongsiTypes != ''">
+                and a.gongsi_types = #{params.gongsiTypes}
+            </if>
+            <if test=" params.gongsiPhone != '' and params.gongsiPhone != null and params.gongsiPhone != 'null' ">
+                and a.gongsi_phone like CONCAT('%',#{params.gongsiPhone},'%')
+            </if>
+            <if test=" params.gongsiEmail != '' and params.gongsiEmail != null and params.gongsiEmail != 'null' ">
+                and a.gongsi_email like CONCAT('%',#{params.gongsiEmail},'%')
+            </if>
+            <if test=" params.gongsiContent != '' and params.gongsiContent != null and params.gongsiContent != 'null' ">
+                and a.gongsi_content like CONCAT('%',#{params.gongsiContent},'%')
+            </if>
+            <if test="params.gongsiDeleteStart != null and params.gongsiDeleteStart != ''">
+                <![CDATA[  and a.gongsi_delete >= #{params.gongsiDeleteStart}   ]]>
+            </if>
+            <if test="params.gongsiDeleteEnd != null and params.gongsiDeleteEnd != ''">
+                <![CDATA[  and a.gongsi_delete <= #{params.gongsiDeleteEnd}   ]]>
+            </if>
+             <if test="params.gongsiDelete != null and params.gongsiDelete != ''">
+                and a.gongsi_delete = #{params.gongsiDelete}
+             </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
